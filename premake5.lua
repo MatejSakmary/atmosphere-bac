@@ -22,6 +22,7 @@ project "Atmosphere"
         includedirs {
             "$(VULKAN_SDK)/include", 
             "dependencies/GLFW/include",
+            "dependencies/glm",
         }
         system "windows"
 
