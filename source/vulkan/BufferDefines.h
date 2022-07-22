@@ -1,6 +1,6 @@
 #pragma once
 
-#define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
+//#define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
 #define GLM_FORCE_RADIANS
 /* GLM uses OpenGL default of -1,1 for the perspective projection so
    I need to force it to use Vulkan default which is 0,1 */

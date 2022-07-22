@@ -1,15 +1,17 @@
 /* Taken from here:
     https://github.com/SebLague/Clouds/blob/master/Assets/Scripts/Clouds/Noise/Compute/NoiseGenCompute.compute*/
 #version 450
+
+#extension GL_EXT_scalar_block_layout : require
 struct Vector{
     float x, y, z;
 };
 
 layout (local_size_x = 4, local_size_y = 4, local_size_z = 4) in;
 
-layout (std430, set = 0, binding = 0) buffer pointsABuffer { Vector pointsA []; };
-layout (std430, set = 0, binding = 1) buffer pointsBBuffer { Vector pointsB []; };
-layout (std430, set = 0, binding = 2) buffer pointsCBuffer { Vector pointsC []; };
+layout (scalar, set = 0, binding = 0) buffer pointsABuffer { Vector pointsA []; };
+layout (scalar, set = 0, binding = 1) buffer pointsBBuffer { Vector pointsB []; };
+layout (scalar, set = 0, binding = 2) buffer pointsCBuffer { Vector pointsC []; };
 layout (std430, set = 0, binding = 3) buffer minMaxBuffer { int minVal; int maxVal; };
 layout (std140, set = 0, binding = 4) uniform worleyParamsBuffer
 {

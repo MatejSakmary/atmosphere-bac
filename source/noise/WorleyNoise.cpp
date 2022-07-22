@@ -416,6 +416,7 @@ void WorleyNoise3D::copyCPUBufferIntoGPUBuffer(void* cpuData,
         VK_MEMORY_PROPERTY_HOST_COHERENT_BIT); 
 
     void* data;
+    std::vector<float> data__;
     vkMapMemory(device->device, stagingBuffer.bufferMemory, 0, bufferSize, 0, &data);
     memcpy(data, cpuData, (size_t)bufferSize);
     vkUnmapMemory(device->device, stagingBuffer.bufferMemory);

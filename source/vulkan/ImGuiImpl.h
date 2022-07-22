@@ -7,7 +7,7 @@
 /* Force alignment of glm data types to respect the alignment required
    by Vulkan NOTE: this does not cover nested data structures in that case
    I need to use alignas(16) prefix */
-#define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
+//#define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
 #define GLM_FORCE_RADIANS
 /* GLM uses OpenGL default of -1,1 for the perspective projection so
    I need to force it to use Vulkan default which is 0,1 */
