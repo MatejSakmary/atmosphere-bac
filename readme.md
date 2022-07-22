@@ -28,4 +28,4 @@ and [vulkan-dll](https://vulkan.lunarg.com/sdk/home#linux)
 
 ## Assets
 
-The assets (textures) used by the application are stored on my google drive due to their size. To succesfully run the application download the assets folder from [here](https://drive.google.com/file/d/1ClGyf0kVHEH8CMl51A2YLXd42YAYZG7J/view?usp=sharing) and extract it to the **atmosphere-bac** directory (next to source, shaders...).
+The assets (textures) used by the application are stored on my google drive due to their size. To succesfully run the application download the assets folder from [here](https://drive.google.com/file/d/1ClGyf0kVHEH8CMl51A2YLXd42YAYZG7J/view?usp=sharing) and extract it to the **atmosphere-bac** directory (next to source, shaders etc). Make sure to extract/copy only the contents of the directory (the resulting structure should be **atmosphere-bac/assets/textures** not **atmosphere-bac/assets/assets/texture**).
