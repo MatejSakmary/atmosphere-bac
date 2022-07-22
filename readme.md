@@ -25,3 +25,7 @@ and [vulkan-dll](https://vulkan.lunarg.com/sdk/home#linux)
 3. From the command line call **compile\_shaders\_linux.sh**. (You will need to call this any time you change the shader source code to recompile them. This will be changed later to be a part of the VS compilation process)
 4. From the command line call **make config=debug\_linux**.
 5. Run the executable stored in bin/Linux/Debug/Atmosphere.
+
+## Assets
+
+The assets (textures) used by the application are stored on my google drive due to their size. To succesfully run the application download the assets folder from [here](https://drive.google.com/file/d/1ClGyf0kVHEH8CMl51A2YLXd42YAYZG7J/view?usp=sharing) and extract it to the **atmosphere-bac** directory (next to source, shaders...).
