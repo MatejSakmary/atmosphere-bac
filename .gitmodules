@@ -1,3 +1,6 @@
 [submodule "source/dep/glfw"]
 	path = source/dep/glfw
 	url = git@github.com:glfw/glfw.git
+[submodule "source/dep/glm"]
+	path = source/dep/glm
+	url = git@github.com:g-truc/glm.git
