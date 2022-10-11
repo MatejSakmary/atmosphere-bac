@@ -2938,14 +2938,12 @@ void Renderer::drawComputeFrame()
         0, 22, 22*sizeof(uint64_t), perFrameData[imageIndex].timestamps.data(),
         0, VK_QUERY_RESULT_WAIT_BIT | VK_QUERY_RESULT_64_BIT);
 
-    std::vector<double> measurements;
-    measurements.reserve(perFrameData[0].timestamps.size() / 2);
+    std::vector<double> measurements(perFrameData[0].timestamps.size()/2, 0);
     static float count = 1;
 
     for( int i = 0; i < perFrameData[0].timestamps.size(); i += 2)
     {
-        measurements[i/2] = perFrameData[imageIndex].timestamps[i + 1] - 
-            perFrameData[imageIndex].timestamps[i]; 
+        measurements[i/2] = perFrameData[imageIndex].timestamps[i + 1] - perFrameData[imageIndex].timestamps[i]; 
         measurements[i/2] /= 1000000.0;
 
         accum[i/2] += measurements[i/2];

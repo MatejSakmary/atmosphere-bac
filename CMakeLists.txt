@@ -13,6 +13,12 @@ add_library(tinyexr STATIC "source/dep/tinyexr/tinyexr.cpp")
 target_include_directories(tinyexr PRIVATE "source/dep/miniz")
 target_link_libraries(tinyexr PRIVATE miniz)
 
+# Set GLFW variables so that we don't build GLFW test etc
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+add_subdirectory("source/dep/glfw")
+
 add_library(imgui STATIC
     "source/dep/imgui/imgui_demo.cpp"
     "source/dep/imgui/imgui_draw.cpp"
@@ -26,6 +32,8 @@ add_library(imgui STATIC
 target_include_directories(imgui PRIVATE
     "source/dep/imgui"
 )
+
+target_link_libraries(imgui PUBLIC Vulkan::Vulkan glfw)
 
 
 add_executable(${PROJECT_NAME}
@@ -56,11 +64,6 @@ target_include_directories(${PROJECT_NAME}
 
 find_package(Vulkan REQUIRED)
 
-# Set GLFW variables so that we don't build GLFW test etc
-set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-add_subdirectory("source/dep/glfw")
 
 add_subdirectory("source/dep/glm")
 

@@ -1,6 +1,5 @@
 #ignore build directories
-obj/**
-bin/**
+build/**
 assets/**
 .vscode/**
 
