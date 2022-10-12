@@ -303,7 +303,7 @@ WorleyNoise3D::WorleyNoise3D(glm::ivec3 texDimensions, WorleyNoiseCreateParams p
     #pragma end noiseDSCreation
 
     /* ===================== Create Vulkan pipelines ========================================== */
-    auto worleyNoiseComputeShaderCode = readFile("shaders/build/noise/worley_noise_3D.spv");
+    auto worleyNoiseComputeShaderCode = readFile("shaders/build/worley_noise_3D.glsl.spv");
     VkShaderModule worleyNoiseComputeShaderModule = 
         createShaderModule(device, worleyNoiseComputeShaderCode);
 
@@ -316,7 +316,7 @@ WorleyNoise3D::WorleyNoise3D(glm::ivec3 texDimensions, WorleyNoiseCreateParams p
     vkDestroyShaderModule(device->device, worleyNoiseComputeShaderModule, nullptr);
 
 
-    auto normalizeNoiseComputeShaderCode = readFile("shaders/build/noise/normalize_noise_3D.spv");
+    auto normalizeNoiseComputeShaderCode = readFile("shaders/build/normalize_noise_3D.glsl.spv");
     VkShaderModule normalizeNoiseComputeShaderModule = 
         createShaderModule(device, normalizeNoiseComputeShaderCode);
     normalizeNoisePipeline = std::make_unique<VulkanPipeline>(

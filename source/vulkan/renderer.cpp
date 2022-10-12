@@ -1110,7 +1110,7 @@ void Renderer::createPipelines()
     #pragma region computePipelines
 
     #pragma region transmittanceLUTPipeline
-    auto transmittanceLUTComputeShaderCode = readFile("shaders/build/transmittanceLUT.spv");
+    auto transmittanceLUTComputeShaderCode = readFile("shaders/build/transmittanceLUT.glsl.spv");
     VkShaderModule transmittanceLUTComputeShaderModule = 
         createShaderModule(vDevice, transmittanceLUTComputeShaderCode);
 
@@ -1130,7 +1130,7 @@ void Renderer::createPipelines()
     #pragma endregion transmittanceLUTPipeline
 
     #pragma region multiscatteringLUTPipeline
-    auto multiscatteringLUTComputeShaderCode = readFile("shaders/build/multiscatteringLUT.spv");
+    auto multiscatteringLUTComputeShaderCode = readFile("shaders/build/multiscatteringLUT.glsl.spv");
     VkShaderModule multiscatteringLUTComputeShaderModule = 
         createShaderModule(vDevice, multiscatteringLUTComputeShaderCode);
 
@@ -1149,7 +1149,7 @@ void Renderer::createPipelines()
     #pragma endregion multiscatteringLUTPipeline
 
     #pragma region skyViewLUTPipeline
-    auto skyViewLUTComputeShaderCode = readFile("shaders/build/skyviewLUT.spv");
+    auto skyViewLUTComputeShaderCode = readFile("shaders/build/skyviewLUT.glsl.spv");
     VkShaderModule skyViewLUTComputeShaderModule = 
         createShaderModule(vDevice, skyViewLUTComputeShaderCode);
 
@@ -1169,7 +1169,7 @@ void Renderer::createPipelines()
     #pragma endregion skyViewLUTPipeline
 
     #pragma region AEPerspectiveLUTPipeline
-    auto AEPerspectiveLUTComputeShaderCode = readFile("shaders/build/aerialPerspectiveLUT.spv");
+    auto AEPerspectiveLUTComputeShaderCode = readFile("shaders/build/aerialPerspectiveLUT.glsl.spv");
     VkShaderModule AEPerspectiveLUTComputeShaderModule = 
         createShaderModule(vDevice, AEPerspectiveLUTComputeShaderCode);
 
@@ -1188,7 +1188,7 @@ void Renderer::createPipelines()
     #pragma endregion AEPerspectiveLUTPipeline
 
     #pragma region computeHistogramCreatePipeline
-    auto histogramComputeShaderCode = readFile("shaders/build/histogram_generate.spv");
+    auto histogramComputeShaderCode = readFile("shaders/build/histogram_generate.glsl.spv");
     VkShaderModule histogramComputeShaderModule = 
         createShaderModule(vDevice, histogramComputeShaderCode);
 
@@ -1207,7 +1207,7 @@ void Renderer::createPipelines()
     #pragma endregion computeHistogramCreatePipeline
 
     #pragma region computeHistogramSumPipeline
-    auto sumHistogramComputeShaderCode = readFile("shaders/build/histogram_sum.spv");
+    auto sumHistogramComputeShaderCode = readFile("shaders/build/histogram_sum.glsl.spv");
     VkShaderModule sumHistogramComputeShaderModule = 
         createShaderModule(vDevice, sumHistogramComputeShaderCode);
 
@@ -1228,8 +1228,8 @@ void Renderer::createPipelines()
     #pragma endregion compute_pipelines
 
     #pragma region drawCloudsPipeline
-    auto cloudsVertexShaderCode = readFile("shaders/build/screen_triangle.spv");
-    auto cloudsFragmentShaderCode = readFile("shaders/build/draw_clouds.spv");
+    auto cloudsVertexShaderCode = readFile("shaders/build/screen_triangle.vert.spv");
+    auto cloudsFragmentShaderCode = readFile("shaders/build/draw_clouds.frag.spv");
 
     VkShaderModule cloudsVertexShaderModule = createShaderModule(vDevice, cloudsVertexShaderCode); 
     VkShaderModule cloudsFragmentShaderModule = createShaderModule(vDevice, cloudsFragmentShaderCode); 
@@ -1282,8 +1282,8 @@ void Renderer::createPipelines()
     #pragma endregion drawCloudsPipeline
 
     #pragma region drawSkyPipeline
-    auto skyVertexShaderCode = readFile("shaders/build/screen_triangle.spv");
-    auto skyFragmentShaderCode = readFile("shaders/build/draw_far_sky.spv");
+    auto skyVertexShaderCode = readFile("shaders/build/screen_triangle.vert.spv");
+    auto skyFragmentShaderCode = readFile("shaders/build/draw_far_sky.frag.spv");
 
     VkShaderModule skyVertexShaderModule = createShaderModule(vDevice, skyVertexShaderCode); 
     VkShaderModule skyFragmentShaderModule = createShaderModule(vDevice, skyFragmentShaderCode); 
@@ -1334,8 +1334,8 @@ void Renderer::createPipelines()
     #pragma endregion drawSkyPipeline
 
     #pragma region drawAEPerspective
-    auto aePerspectiveVertexShaderCode = readFile("shaders/build/screen_triangle.spv");
-    auto aePerspectiveFragmentShaderCode = readFile("shaders/build/draw_AE_perspective.spv");
+    auto aePerspectiveVertexShaderCode = readFile("shaders/build/screen_triangle.vert.spv");
+    auto aePerspectiveFragmentShaderCode = readFile("shaders/build/draw_AE_perspective.frag.spv");
 
     VkShaderModule aePerspectiveVertexShaderModule = createShaderModule(vDevice, aePerspectiveVertexShaderCode); 
     VkShaderModule aePerspectiveFragmentShaderModule = createShaderModule(vDevice, aePerspectiveFragmentShaderCode); 
@@ -1386,8 +1386,8 @@ void Renderer::createPipelines()
     #pragma endregion drawAEPerspective
 
     #pragma region final_pass_pipeline
-    auto vertexShaderCode = readFile("shaders/build/screen_triangle.spv");
-    auto fragmentShaderCode = readFile("shaders/build/final_composition.spv");
+    auto vertexShaderCode = readFile("shaders/build/screen_triangle.vert.spv");
+    auto fragmentShaderCode = readFile("shaders/build/final_composition.frag.spv");
 
     VkShaderModule vertexShaderModule = createShaderModule(vDevice, vertexShaderCode); 
     VkShaderModule fragmentShaderModule = createShaderModule(vDevice, fragmentShaderCode); 
