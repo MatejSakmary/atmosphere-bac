@@ -250,25 +250,26 @@ Renderer::~Renderer()
     indexBuffer.reset();
     cleanupSwapchain();
 
+    for(auto & perFrame : perFrameData)
+    {
+        perFrame.buffers.clear();
+        perFrame.images.clear();
+    }
+
     // commonUniformBuffer.reset();
-    // vkFreeCommandBuffers(vDevice->device, vDevice->graphicsCommandPool,
-    //     static_cast<uint32_t>(postProcessCommandBuffers.size()), postProcessCommandBuffers.data());
 
-    // vkDestroyDescriptorPool(vDevice->device, descriptorPool, nullptr);
-    // vkDestroyRenderPass(vDevice->device, renderPass, nullptr);
-
-    // vkDestroyDescriptorSetLayout(vDevice->device, descriptorSetLayout, nullptr);
-    // for (auto framebuffer : swapChainFramebuffers)
-    // {
-    //     vkDestroyFramebuffer(vDevice->device, framebuffer, nullptr);
-    // }
-
+    vkDestroySemaphore(vDevice->device, postProcessReadySemaphore, nullptr);
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
         vkDestroySemaphore(vDevice->device, renderFinishedSemaphores[i], nullptr);
         vkDestroySemaphore(vDevice->device, imageAvailableSemaphores[i], nullptr);
         vkDestroyFence(vDevice->device, inFlightFences[i], nullptr);
     }
+    vkDestroySampler(vDevice->device, AEPerspectiveSampler, nullptr);
+    vkDestroySampler(vDevice->device, cloudsSampler, nullptr);
+    vkDestroySampler(vDevice->device, skyViewLUTSampler, nullptr);
+    vkDestroySampler(vDevice->device, terrainTexturesSampler, nullptr);
+    vkDestroySampler(vDevice->device, depthTextureSampler, nullptr);
 
     vDevice.reset();
     if(validationEnabled)
@@ -1102,6 +1103,8 @@ void Renderer::createPipelines()
         VulkanPipeline::initPiplineLayoutCI(4, terrainDescriptorSetLayouts),
         hdrBackbufferPass,
         0);
+        vkDestroyShaderModule(vDevice->device, terrainVertShaderModule, nullptr);
+        vkDestroyShaderModule(vDevice->device, terrainFragShaderModule, nullptr);
     #pragma endregion terrainPassPipeline
 
     #pragma region computePipelines
@@ -1122,6 +1125,8 @@ void Renderer::createPipelines()
         VulkanPipeline::initPiplineLayoutCI(3, transmittanceDSLayouts),
         VulkanPipeline::initComputeShaderStageCI(transmittanceLUTComputeShaderModule)
     );
+
+    vkDestroyShaderModule(vDevice->device, transmittanceLUTComputeShaderModule, nullptr);
     #pragma endregion transmittanceLUTPipeline
 
     #pragma region multiscatteringLUTPipeline
@@ -1140,6 +1145,7 @@ void Renderer::createPipelines()
         VulkanPipeline::initPiplineLayoutCI(3, multiscatteringDSLayouts),
         VulkanPipeline::initComputeShaderStageCI(multiscatteringLUTComputeShaderModule)
     );
+    vkDestroyShaderModule(vDevice->device, multiscatteringLUTComputeShaderModule, nullptr);
     #pragma endregion multiscatteringLUTPipeline
 
     #pragma region skyViewLUTPipeline
@@ -1158,6 +1164,8 @@ void Renderer::createPipelines()
         VulkanPipeline::initPiplineLayoutCI(3, skyViewDSLayouts),
         VulkanPipeline::initComputeShaderStageCI(skyViewLUTComputeShaderModule)
     );
+
+    vkDestroyShaderModule(vDevice->device, skyViewLUTComputeShaderModule, nullptr);
     #pragma endregion skyViewLUTPipeline
 
     #pragma region AEPerspectiveLUTPipeline
@@ -1176,6 +1184,7 @@ void Renderer::createPipelines()
         VulkanPipeline::initPiplineLayoutCI(3, AEPerspectiveDSLayouts),
         VulkanPipeline::initComputeShaderStageCI(AEPerspectiveLUTComputeShaderModule)
     );
+    vkDestroyShaderModule(vDevice->device, AEPerspectiveLUTComputeShaderModule, nullptr);
     #pragma endregion AEPerspectiveLUTPipeline
 
     #pragma region computeHistogramCreatePipeline
@@ -1194,6 +1203,7 @@ void Renderer::createPipelines()
         VulkanPipeline::initPiplineLayoutCI(3, histogramDSLayouts),
         VulkanPipeline::initComputeShaderStageCI(histogramComputeShaderModule)
     );
+    vkDestroyShaderModule(vDevice->device, histogramComputeShaderModule, nullptr);
     #pragma endregion computeHistogramCreatePipeline
 
     #pragma region computeHistogramSumPipeline
@@ -1212,6 +1222,7 @@ void Renderer::createPipelines()
         VulkanPipeline::initPiplineLayoutCI(3, sumHistogramDSLayouts),
         VulkanPipeline::initComputeShaderStageCI(sumHistogramComputeShaderModule)
     );
+    vkDestroyShaderModule(vDevice->device, sumHistogramComputeShaderModule, nullptr);
     #pragma endregion computeHistogramSumPipeline
 
     #pragma endregion compute_pipelines
@@ -1266,6 +1277,8 @@ void Renderer::createPipelines()
         VulkanPipeline::initPiplineLayoutCI(6, cloudsDescriptorSetLayouts),
         hdrBackbufferPass,
         2);
+        vkDestroyShaderModule(vDevice->device, cloudsVertexShaderModule, nullptr);
+        vkDestroyShaderModule(vDevice->device, cloudsFragmentShaderModule, nullptr);
     #pragma endregion drawCloudsPipeline
 
     #pragma region drawSkyPipeline
@@ -1316,6 +1329,8 @@ void Renderer::createPipelines()
         VulkanPipeline::initPiplineLayoutCI(4, skyDescriptorSetLayouts),
         hdrBackbufferPass,
         1);
+        vkDestroyShaderModule(vDevice->device, skyVertexShaderModule, nullptr);
+        vkDestroyShaderModule(vDevice->device, skyFragmentShaderModule, nullptr);
     #pragma endregion drawSkyPipeline
 
     #pragma region drawAEPerspective
@@ -1366,6 +1381,8 @@ void Renderer::createPipelines()
         VulkanPipeline::initPiplineLayoutCI(4, aePerspectiveDescriptorSetLayouts),
         hdrBackbufferPass,
         3);
+        vkDestroyShaderModule(vDevice->device, aePerspectiveVertexShaderModule, nullptr);
+        vkDestroyShaderModule(vDevice->device, aePerspectiveFragmentShaderModule, nullptr);
     #pragma endregion drawAEPerspective
 
     #pragma region final_pass_pipeline
@@ -1416,6 +1433,8 @@ void Renderer::createPipelines()
         renderPass,
         0);
 
+        vkDestroyShaderModule(vDevice->device, vertexShaderModule, nullptr);
+        vkDestroyShaderModule(vDevice->device, fragmentShaderModule, nullptr);
     #pragma endregion final_pass_pipeline
 }
 
@@ -2749,13 +2768,6 @@ void Renderer::createComputeSyncObjects()
     VkSemaphoreCreateInfo graphicsSemaphoreCreateInfo {};
     graphicsSemaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
-    if(vkCreateSemaphore(vDevice->device, &graphicsSemaphoreCreateInfo, nullptr,
-        &graphicsSemaphore) != VK_SUCCESS)
-    {
-        throw std::runtime_error("RENDERER::CREATE_COMPUTE_SYNC_OBJECTS::Failed \
-            to create compute sychroniztion objects");
-    }
-
     VkSemaphoreCreateInfo skyViewComputeSemaphoreInfo {};
     skyViewComputeSemaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
@@ -2768,7 +2780,7 @@ void Renderer::createComputeSyncObjects()
 }
 
 bool redrawNoise = true;
-void Renderer::drawComputeFrame()
+void Renderer::drawFrame()
 {
     uint32_t imageIndex;
 

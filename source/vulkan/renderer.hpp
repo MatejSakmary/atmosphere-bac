@@ -52,7 +52,6 @@ public:
     ~Renderer();
 
     void drawFrame();
-    void drawComputeFrame();
 
 private:
     bool validationEnabled;
@@ -98,9 +97,6 @@ private:
     VkSurfaceKHR surface;
     VkRenderPass renderPass;
     VkRenderPass hdrBackbufferPass;
-
-    /* Compute */
-    VkSemaphore graphicsSemaphore;
 
     VkSemaphore postProcessReadySemaphore;
     VkSampler AEPerspectiveSampler;

@@ -41,6 +41,8 @@ class ImGuiImpl
     ImGuiImpl(VkInstance instance, std::shared_ptr<VulkanDevice> &device, GLFWwindow* window, 
             std::unique_ptr<VulkanSwapChain> &swapchain);
     
+    ~ImGuiImpl();
+    
     VkCommandBuffer PrepareNewFrame(uint32_t imageIndex, VkFramebuffer framebuffer,
         Camera *camera, PostProcessParamsBuffer &postParams, AtmosphereParametersBuffer &atmoParams,
         CloudsParametersBuffer &cloudParams, std::array<uint64_t, 60> &measurements, glm::vec2 extent);
@@ -53,6 +55,7 @@ class ImGuiImpl
         uint32_t imageCount;
         VkDescriptorPool imguiDSPool;
         VkCommandPool imGuiCommandPool;
+        std::shared_ptr<VulkanDevice> vDevice;
         /* This does not need to be a vector, but I am preparing for multiple frames in 
            flight */
         std::vector<VkCommandBuffer> imGuiCommandBuffers;

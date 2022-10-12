@@ -11,9 +11,8 @@ static void check_vk_result(VkResult err)
 
 
 ImGuiImpl::ImGuiImpl(VkInstance instance, std::shared_ptr<VulkanDevice> &device, GLFWwindow* window, 
-    std::unique_ptr<VulkanSwapChain> &swapchain) : showPostProcessWindow {true}
+    std::unique_ptr<VulkanSwapChain> &swapchain) : showPostProcessWindow {true}, vDevice{device}
 {
-
     VkDescriptorPoolSize pool_sizes[] =
     {
         { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
@@ -299,3 +298,11 @@ VkCommandBuffer ImGuiImpl::PrepareNewFrame(uint32_t imageIndex, VkFramebuffer fr
     return imGuiCommandBuffers[imageIndex];
 }
 
+ImGuiImpl::~ImGuiImpl()
+{
+    vkDestroyDescriptorPool(vDevice->device, imguiDSPool, nullptr);
+    vkDestroyRenderPass(vDevice->device, imguiRenderPass, nullptr);
+    vkDestroyCommandPool(vDevice->device, imGuiCommandPool, nullptr);
+    ImGui_ImplVulkan_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+}

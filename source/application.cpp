@@ -102,7 +102,7 @@ void Application::MainLoop()
     {
        glfwPollEvents();
        processInput(window);
-       renderer->drawComputeFrame();
+       renderer->drawFrame();
     }
 
     /*  Wait for logical device to finish operations ->

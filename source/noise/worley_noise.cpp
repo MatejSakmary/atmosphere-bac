@@ -312,6 +312,8 @@ WorleyNoise3D::WorleyNoise3D(glm::ivec3 texDimensions, WorleyNoiseCreateParams p
         VulkanPipeline::initPiplineLayoutCI(perChannelData[0].worleyNoiseDSLayout),
         VulkanPipeline::initComputeShaderStageCI(worleyNoiseComputeShaderModule)
     );
+     
+    vkDestroyShaderModule(device->device, worleyNoiseComputeShaderModule, nullptr);
 
 
     auto normalizeNoiseComputeShaderCode = readFile("shaders/build/noise/normalize_noise_3D.spv");
@@ -323,6 +325,7 @@ WorleyNoise3D::WorleyNoise3D(glm::ivec3 texDimensions, WorleyNoiseCreateParams p
         VulkanPipeline::initComputeShaderStageCI(normalizeNoiseComputeShaderModule)
     );
     worleyNoiseCommadBuffer = device->createComputeCommandBuffer();
+    vkDestroyShaderModule(device->device, normalizeNoiseComputeShaderModule, nullptr);
 
     /* ===================== Create and record command buffer ==================================== */
     VkCommandBufferBeginInfo beginWorleyCmdBuffer {};
@@ -465,4 +468,13 @@ void WorleyNoise3D::generateNoise()
 }
 
 float WorleyNoise3D::getRandNum() { return distribution(mt); }
+
+WorleyNoise3D::~WorleyNoise3D()
+{
+    for(auto& perChannel : perChannelData)
+    {
+        vkDestroyDescriptorSetLayout(device->device, perChannel.worleyNoiseDSLayout, nullptr);
+    }
+    vkDestroyDescriptorSetLayout(device->device, normalizeNoiseDSLayout, nullptr);
+}
 

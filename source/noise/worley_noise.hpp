@@ -80,6 +80,8 @@ class WorleyNoise3D
         WorleyNoise3D(glm::ivec3 texDimensions, WorleyNoiseCreateParams params, 
             std::shared_ptr<VulkanDevice> device, VkDescriptorPool pool);
 
+        ~WorleyNoise3D();
+
         void generateNoise();
 
     private:
