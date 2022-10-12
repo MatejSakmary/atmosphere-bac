@@ -80,7 +80,11 @@ Application::Application()
 {
     glfwData = new GLFWUserData();
     InitWindow();
+#ifdef NDEBUG
+    renderer = std::make_unique<Renderer>(window, false);
+#else
     renderer = std::make_unique<Renderer>(window, true);
+#endif
     glfwData->renderer = renderer.get();
     framebufferResized = false;
 };
