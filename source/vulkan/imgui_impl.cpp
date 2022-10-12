@@ -126,7 +126,7 @@ ImGuiImpl::ImGuiImpl(VkInstance instance, std::shared_ptr<VulkanDevice> &device,
 
 VkCommandBuffer ImGuiImpl::PrepareNewFrame(uint32_t imageIndex, VkFramebuffer framebuffer,
     Camera *camera, PostProcessParamsBuffer &postParams, AtmosphereParametersBuffer &atmoParams,
-    CloudsParametersBuffer &cloudParams, glm::vec2 extent)
+    CloudsParametersBuffer &cloudParams, std::array<uint64_t, 60> &measurements ,glm::vec2 extent)
 {
     ImGui_ImplVulkan_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -247,6 +247,28 @@ VkCommandBuffer ImGuiImpl::PrepareNewFrame(uint32_t imageIndex, VkFramebuffer fr
                 break;
         }
     }
+
+    std::vector<double> measurements_computed(measurements.size()/4, 0);
+
+    for( int i = 0; i < measurements.size(); i += 4)
+    {
+        measurements_computed[i/4] = measurements[i + 2] - measurements[i]; 
+        measurements_computed[i/4] /= 1000000.0;
+    }
+
+    ImGui::Begin("Performance measurements");
+    ImGui::Text("Transmittance LUT          : %f ms", measurements_computed[0] );
+    ImGui::Text("Multiscattering LUT        : %f ms", measurements_computed[1] );
+    ImGui::Text("SkyView LUT                : %f ms", measurements_computed[2] );
+    ImGui::Text("Aerial Perspective LUT     : %f ms", measurements_computed[3] );
+    ImGui::Text("Terrain                    : %f ms", measurements_computed[4] );
+    ImGui::Text("Far Sky Pass               : %f ms", measurements_computed[5] );
+    ImGui::Text("Clouds Pass                : %f ms", measurements_computed[6] );
+    ImGui::Text("Aerial perspective Pass    : %f ms", measurements_computed[7] );
+    ImGui::Text("Histogram construction     : %f ms", measurements_computed[8] );
+    ImGui::Text("Histogram sum              : %f ms", measurements_computed[9] );
+    ImGui::Text("Tone map                   : %f ms", measurements_computed[10] );
+    ImGui::End();
 
     /* Command buffer preparation */
     VkCommandBufferBeginInfo info = {};

@@ -43,7 +43,7 @@ class ImGuiImpl
     
     VkCommandBuffer PrepareNewFrame(uint32_t imageIndex, VkFramebuffer framebuffer,
         Camera *camera, PostProcessParamsBuffer &postParams, AtmosphereParametersBuffer &atmoParams,
-        CloudsParametersBuffer &cloudParams, glm::vec2 extent);
+        CloudsParametersBuffer &cloudParams, std::array<uint64_t, 60> &measurements, glm::vec2 extent);
 
     private:
         bool showPostProcessWindow;

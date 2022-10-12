@@ -106,7 +106,7 @@ void Renderer::createPreset(int presetNum)
     }
 }
 
-Renderer::Renderer(GLFWwindow *window) : framebufferResized{false}
+Renderer::Renderer(GLFWwindow *window, bool enableValidation) : framebufferResized{false}, validationEnabled{enableValidation}
 {
     perFrameData = {};
     this->window = window;
@@ -139,10 +139,9 @@ Renderer::Renderer(GLFWwindow *window) : framebufferResized{false}
     createPreset(1);
     /* TODO: This really shouldn't be hardcoded like this */
     // createInstance(true);
-    createInstance(false);
+    createInstance(enableValidation);
     createSurface();
-    /* TODO: This really shouldn't be hardcoded like this */
-    if(false) {setupDebugMessenger(instance, &debugMessenger);}
+    if(enableValidation) {setupDebugMessenger(instance, &debugMessenger);}
     vDevice = std::make_shared<VulkanDevice>(instance, surface);
     vDevice->createCommandPool();
 
@@ -162,12 +161,8 @@ Renderer::Renderer(GLFWwindow *window) : framebufferResized{false}
 
     createPipelines();
 
-    // COMPUTE
-    /* Change function signature */
     prepareTextureTargets(256, 64, VK_FORMAT_R16G16B16A16_SFLOAT);
-    // END of COMPUTE
 
-    /* Timestamps */
     createQuerryPool();
 
     createFramebuffers();
@@ -207,7 +202,6 @@ Renderer::Renderer(GLFWwindow *window) : framebufferResized{false}
 
 };
 
-/*TODO: Should this be a part of Renderer class?  */
 void DestroyDebugUtilsMessengerEXT(
     VkInstance instance,
     const VkAllocationCallbacks *pAllocator,
@@ -229,8 +223,8 @@ void DestroyDebugUtilsMessengerEXT(
 Renderer::~Renderer()
 {
     /* Manually reset pointers to invoke destructor -> I don't know how else
-       to do this since unique pointers are destroyed after destruktor executes
-       which results in bunch of warnings from the VK validation layers */
+       to do this since without this a bunch of warnings from the VK validation layers
+       about not destroyed objects pop up */
     for(int i = 0; i < vSwapChain->imageCount; i++)
     {
         for(auto &buffer : perFrameData[i].buffers)
@@ -277,8 +271,7 @@ Renderer::~Renderer()
     }
 
     vDevice.reset();
-    /* TODO: change to validation layers enabled  */
-    if(true)
+    if(validationEnabled)
     {
         DestroyDebugUtilsMessengerEXT(instance, nullptr, debugMessenger);
     }
@@ -841,46 +834,6 @@ void Renderer::createDescriptorSetLayout()
     }
     #pragma endregion transmittanceLUT
 
-    // #pragma region multiscatteringLUTDS
-    // VkDescriptorSetLayoutBinding multiscatteringLUTDSLayoutBinding_;
-    // multiscatteringLUTDSLayoutBinding_.binding = 0;
-    // multiscatteringLUTDSLayoutBinding_.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-    // multiscatteringLUTDSLayoutBinding_.descriptorCount = 1;
-    // multiscatteringLUTDSLayoutBinding_.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
-
-    // VkDescriptorSetLayoutCreateInfo multiscatteringLUTDSLayoutCI{};
-    // multiscatteringLUTDSLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    // multiscatteringLUTDSLayoutCI.bindingCount = 1;
-    // multiscatteringLUTDSLayoutCI.pBindings = &multiscatteringLUTDSLayoutBinding_;
-
-    // if (vkCreateDescriptorSetLayout(vDevice->device, &multiscatteringLUTDSLayoutCI,
-    //     nullptr, &multiscatteringLUTDSLayout) != VK_SUCCESS)
-    // {
-    //     throw std::runtime_error("RENDERER::CREATE_DESCRIPTOR_SET_LAYOUT::\
-    //         Failed to create multiscattering descriptor set layout");
-    // }
-    // #pragma endregion multiscatteringLUTDS
-
-    // #pragma region skyViewLUTOutDS
-    // VkDescriptorSetLayoutBinding skyViewLUTOutDSLayoutBinding_;
-    // skyViewLUTOutDSLayoutBinding_.binding = 0;
-    // skyViewLUTOutDSLayoutBinding_.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-    // skyViewLUTOutDSLayoutBinding_.descriptorCount = 1;
-    // skyViewLUTOutDSLayoutBinding_.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
-
-    // VkDescriptorSetLayoutCreateInfo skyViewLUTOutDSLayoutCI{};
-    // skyViewLUTOutDSLayoutCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    // skyViewLUTOutDSLayoutCI.bindingCount = 1;
-    // skyViewLUTOutDSLayoutCI.pBindings = &skyViewLUTOutDSLayoutBinding_;
-
-    // if (vkCreateDescriptorSetLayout(vDevice->device, &skyViewLUTOutDSLayoutCI,
-    //     nullptr, &skyViewLUTOutDSLayout) != VK_SUCCESS)
-    // {
-    //     throw std::runtime_error("RENDERER::CREATE_DESCRIPTOR_SET_LAYOUT::\
-    //         Failed to create skyViewLUTOut descriptor set layout");
-    // }
-    // #pragma endregion skyViewLUTOutDS
-
     #pragma region AEPerspectiveLUTDS
     VkDescriptorSetLayoutBinding AEPerpsectiveLUTDSLayoutBinding_{};
     AEPerpsectiveLUTDSLayoutBinding_.binding = 0;
@@ -973,7 +926,7 @@ void Renderer::createDescriptorSetLayout()
         throw std::runtime_error("RENDERER::CREATE_DESCRIPTOR_SET_LAYOUT::\
             Failed to create depth read one descriptor set layout");
     }
-    #pragma region depthReadOne
+    #pragma endregion depthReadOne
 
     #pragma region depthReadTwo
     VkDescriptorSetLayoutBinding depthReadTwoDsLayoutBinding{};
@@ -994,7 +947,7 @@ void Renderer::createDescriptorSetLayout()
         throw std::runtime_error("RENDERER::CREATE_DESCRIPTOR_SET_LAYOUT::\
             Failed to create depth read two descriptor set layout");
     }
-    #pragma region depthReadTwo
+    #pragma endregion depthReadTwo
 
     #pragma region hdrBackbufferIn
     VkDescriptorSetLayoutBinding hdrBackbufferInDsLayoutBinding{};
@@ -2514,14 +2467,12 @@ void Renderer::updateUniformBuffer(uint32_t currentImage)
     ubo.lHviewProj = ubo.proj * camera->getViewMatrix(true);
     ubo.time = time;
     void *data;
-    /* TODO: move this to buffer */
     vkMapMemory(vDevice->device, findInMap(perFrameData[currentImage].buffers, "CommonUBO")->bufferMemory, 0, sizeof(ubo), 0, &data);
     memcpy(data, &ubo, sizeof(ubo));
     vkUnmapMemory(vDevice->device, findInMap(perFrameData[currentImage].buffers, "CommonUBO")->bufferMemory);
 
 
     atmoParamsBuffer.cameraPosition = camera->getPos();
-    // atmoParamsBuffer.sunDirection = glm::normalize(glm::vec3(-1.0f, 0.0f, (glm::cos(time/4.0f) + 1.0f)/2.0f));
     atmoParamsBuffer.sunDirection = glm::vec3(
         glm::cos(glm::radians(atmoParamsBuffer.sunPhiAngle)) * glm::sin(glm::radians(atmoParamsBuffer.sunThetaAngle)),
         glm::sin(glm::radians(atmoParamsBuffer.sunPhiAngle)) * glm::sin(glm::radians(atmoParamsBuffer.sunThetaAngle)),
@@ -2545,7 +2496,6 @@ void Renderer::updateUniformBuffer(uint32_t currentImage)
     float timeThisFrame = glfwGetTime();
     /* Cap this to 0.2 to not cause issues due to long render times of first frames */
     postProcessParamsBuffer.timeDelta = glm::min(timeThisFrame - timeLastFrame, 0.020); 
-    // std::cout << "here with frame idx: " << currentImage << " in time: " << timeThisFrame - timeLastFrame << std::endl;
     timeLastFrame = timeThisFrame;
     if(postProcessParamsBuffer.minimumLuminance > postProcessParamsBuffer.maximumLuminance)
     {
@@ -2818,7 +2768,6 @@ void Renderer::createComputeSyncObjects()
 }
 
 bool redrawNoise = true;
-static std::vector<double> accum (15, 0);
 void Renderer::drawComputeFrame()
 {
     uint32_t imageIndex;
@@ -2848,6 +2797,13 @@ void Renderer::drawComputeFrame()
             VK_TRUE, UINT64_MAX);
     }
     perFrameData[imageIndex].inFlightFence = inFlightFences[currentFrame];
+
+    // Query timestamp results of the current image since they are guaranteed to already
+    // have been written here
+    vkGetQueryPoolResults(vDevice->device, perFrameData[imageIndex].querryPool,
+        0, 22, 22*sizeof(uint64_t), perFrameData[imageIndex].timestamps.data(),
+        0, VK_QUERY_RESULT_WITH_AVAILABILITY_BIT | VK_QUERY_RESULT_64_BIT);
+
 
     updateUniformBuffer(imageIndex);
     if(redrawNoise)
@@ -2893,7 +2849,8 @@ void Renderer::drawComputeFrame()
         imguiImpl->PrepareNewFrame(
             imageIndex,
             findInMap(perFrameData[imageIndex].framebuffers, "ImGui"), camera, 
-            postProcessParamsBuffer, atmoParamsBuffer, cloudsParamsBuffer, extent)
+            postProcessParamsBuffer, atmoParamsBuffer, cloudsParamsBuffer,
+            perFrameData[imageIndex].timestamps, extent)
     };
 
     //submit graphics commands
@@ -2923,48 +2880,7 @@ void Renderer::drawComputeFrame()
     presentInfo.pSwapchains = &vSwapChain->swapChain;
     presentInfo.pImageIndices = &imageIndex;
 
-
-    if( vkQueueWaitIdle(vDevice->computeQueue) != VK_SUCCESS)
-    {
-        throw std::runtime_error("RENDERER::DRAW_FRAME::Failed to wait compute queue idle");
-    }
-    if( vkQueueWaitIdle(vDevice->graphicsQueue) != VK_SUCCESS)
-    {
-        throw std::runtime_error("RENDERER::DRAW_FRAME::Failed to wait compute queue idle");
-    }
-
-    result = vkQueuePresentKHR(vDevice->presentQueue, &presentInfo);
-    vkGetQueryPoolResults(vDevice->device, perFrameData[imageIndex].querryPool,
-        0, 22, 22*sizeof(uint64_t), perFrameData[imageIndex].timestamps.data(),
-        0, VK_QUERY_RESULT_WAIT_BIT | VK_QUERY_RESULT_64_BIT);
-
-    std::vector<double> measurements(perFrameData[0].timestamps.size()/2, 0);
-    static float count = 1;
-
-    for( int i = 0; i < perFrameData[0].timestamps.size(); i += 2)
-    {
-        measurements[i/2] = perFrameData[imageIndex].timestamps[i + 1] - perFrameData[imageIndex].timestamps[i]; 
-        measurements[i/2] /= 1000000.0;
-
-        accum[i/2] += measurements[i/2];
-
-        measurements[i/2] = accum[i/2] / count;
-    }
-
-    // std::cout << " Trans: " << std::setw(6) << std::fixed << std::setprecision(4) << measurements[0] << "ms";
-    // std::cout << " Multi: " << std::setw(6) << std::fixed << std::setprecision(4) << measurements[1] << "ms";
-    // std::cout << " SkyView: " << std::setw(6) << std::fixed << std::setprecision(4) << measurements[2] << "ms";
-    // std::cout << " AE: " << std::setw(6) << std::fixed << std::setprecision(4) << measurements[3] << "ms";
-    // std::cout << " Terrain: " << std::setw(6) << std::fixed << std::setprecision(4) << measurements[4] << "ms";
-    // std::cout << " FarSky: " << std::setw(6) << std::fixed << std::setprecision(4) << measurements[5] << "ms";
-    // std::cout << " Clouds: " << std::setw(6) << std::fixed << std::setprecision(4) << measurements[6] << "ms";
-    // std::cout << " AEPerspective: " << std::setw(6) << std::fixed << std::setprecision(4) << measurements[7] << "ms";
-    // std::cout << " Hist const: " << std::setw(6) << std::fixed << std::setprecision(4) << measurements[8] << "ms";
-    // std::cout << " Hist sum: " << std::setw(6) << std::fixed << std::setprecision(4) << measurements[9] << "ms";
-    // std::cout << " ToneMap: " << std::setw(6) << std::fixed << std::setprecision(4) << measurements[10] << "ms";
-    // std::cout <<"---- " << count << " " << accum[0];
-    // std::cout << std::endl;
-    count ++;
+    vkQueuePresentKHR(vDevice->presentQueue, &presentInfo);
 
     currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }

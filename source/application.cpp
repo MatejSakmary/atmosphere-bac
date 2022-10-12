@@ -80,12 +80,7 @@ Application::Application()
 {
     glfwData = new GLFWUserData();
     InitWindow();
-    /* TODO: Computing should be done at the start of run loop, however
-       I need to implement Renderer loading textures after constructing
-       which would require rewrite */
-    // ComputeTransmittanceLUT();
-    // mesh = std::make_shared<Mesh>("models/viking_room.obj");
-    renderer = std::make_unique<Renderer>(window);
+    renderer = std::make_unique<Renderer>(window, true);
     glfwData->renderer = renderer.get();
     framebufferResized = false;
 };

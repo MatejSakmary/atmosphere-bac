@@ -37,7 +37,8 @@ struct FrameData{
     std::unordered_map<std::string, VkFramebuffer> framebuffers;
     std::unordered_map<std::string, VkCommandBuffer> commandBuffers;
     VkQueryPool querryPool;
-    std::array<uint64_t, 30> timestamps;
+    // quering with availability
+    std::array<uint64_t, 30 * 2> timestamps;
     VkFence inFlightFence;
 };
 
@@ -47,15 +48,15 @@ public:
     Camera* camera;
     bool framebufferResized;
     std::shared_ptr<VulkanDevice> vDevice;
-    Renderer(GLFWwindow *window);
+    Renderer(GLFWwindow *window, bool enableValidation);
     ~Renderer();
 
     void drawFrame();
     void drawComputeFrame();
 
 private:
+    bool validationEnabled;
     size_t currentFrame = 0;
-    // TODO: This should be swap chain image size instead of 3
     std::array<FrameData, 3> perFrameData;
     /*========================== Frame independent data ===============================*/
     AtmosphereParametersBuffer atmoParamsBuffer;
