@@ -1,3 +1,4 @@
+![Showcase Image](/showcase_image.png?raw=true "Showcase Image")
 This is the repository containing the code for my bachelors thesis. The text to the thesis can be located [here](https://github.com/MatejSakmary/atmosphere-bac-text)
 
 # Building the application
